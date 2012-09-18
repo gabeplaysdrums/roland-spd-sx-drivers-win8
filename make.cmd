@@ -26,17 +26,17 @@ set _wdk_bin="%~dp0wdk\%_arch%"
 
 set _cert_cn=TEST - My Driver Cert
 set _cert_store=TestMyDriverCertStore
+set _cert_file=TestCert.cer
 
 if "%_option%" == "nomakecert" (
     echo not creating test cert
 ) else (
     echo creating test cert
+    %_wdk_bin%\certmgr.exe -del -all -c -s -r LocalMachine %_cert_store%
     %_wdk_bin%\makecert.exe -r -n "CN=%_cert_cn%" -ss %_cert_store% -sr LocalMachine
-
-    echo adding cert to system stores
-    %_wdk_bin%\certmgr.exe -add -c -n "%_cert_cn%" -s -r localMachine %_cert_store% -s -r localMachine root 
-    %_wdk_bin%\certmgr.exe -add -c -n "%_cert_cn%" -s -r localMachine %_cert_store% -s -r localMachine trustedpublisher
 )
+
+%_wdk_bin%\certmgr.exe -put -c -n "%_cert_cn%" -s -r LocalMachine %_cert_store% %_cert_file%
 
 echo making driver package index ^(.cat file^)
 set _inf_file=RDIF1124.INF
@@ -47,14 +47,11 @@ echo signing driver package index
 set _cat_file=rdid1124.cat
 %_wdk_bin%\SignTool.exe sign /s %_cert_store% /n "%_cert_cn%" /t http://timestamp.verisign.com/scripts/timestamp.dll %_cat_file%
 
-echo.
-echo NEXT STEPS:
-echo 1. In device manager, right click the device and choose "Update drivers"
-echo 2. Choose to install drivers from a custom location
-echo 3. Browse to %_output%
-echo 4. Continue and complete installation
-echo 5. Enjoy!
-echo.
+echo finising up
+REM copy min-wdk
+robocopy /e %_wdk_bin% wdk *.*
+REM copy setup script
+robocopy "%~dp0setup" . *.*
 
 goto end
 

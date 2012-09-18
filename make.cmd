@@ -22,7 +22,7 @@ robocopy /e "%~dp0base\%_arch%" %_output% *.*
 
 cd %_output%
 
-set _wdk_bin="%programfiles(x86)%\Windows Kits\8.0\bin\%_arch%"
+set _wdk_bin="%~dp0wdk\%_arch%"
 
 set _cert_cn=TEST - My Driver Cert
 set _cert_store=TestMyDriverCertStore
